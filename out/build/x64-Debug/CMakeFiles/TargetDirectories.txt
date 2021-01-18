@@ -1,0 +1,6 @@
+C:/Users/Ben Gachowski/Desktop/project/ez-lib/ez-gui/out/build/x64-Debug/CMakeFiles/ez-gui.dir
+C:/Users/Ben Gachowski/Desktop/project/ez-lib/ez-gui/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/Ben Gachowski/Desktop/project/ez-lib/ez-gui/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Ben Gachowski/Desktop/project/ez-lib/ez-gui/out/build/x64-Debug/tests/CMakeFiles/rebuild_cache.dir
+C:/Users/Ben Gachowski/Desktop/project/ez-lib/ez-gui/out/build/x64-Debug/tests/CMakeFiles/basic_test.dir
+C:/Users/Ben Gachowski/Desktop/project/ez-lib/ez-gui/out/build/x64-Debug/tests/CMakeFiles/edit_cache.dir
