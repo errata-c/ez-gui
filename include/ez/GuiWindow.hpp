@@ -1,26 +1,23 @@
 #pragma once
-#include <ez/gl.hpp>
+#include <rt/loader.hpp>
+#include <rt/Core.hpp>
 #include <ez/window/Window.hpp>
-#include "gui/Subsystem.hpp"
+
+#include "gui/subsystems/Subsystem.hpp"
 
 namespace ez {
-	namespace intern {
-		// Simple stub class to prepare the window BEFORE the GuiWindow is constructed
-		class PrepareWindow: public Window {
-		public:
-			PrepareWindow(std::string_view title, glm::ivec2 size, ez::window::Style style, const ez::window::RenderSettings& rs)
-				: Window(title, size, style, rs)
-			{
-				setActive(true);
-				ez::gl::load();
-			}
-		};
-	}
-
-	class GuiWindow: public intern::PrepareWindow {
+	class GuiWindow: public Window {
+		static ez::window::GLSettings glset() {
+			ez::window::GLSettings gset;
+			gset.majorVersion() = 4;
+			gset.minorVersion() = 5;
+			gset.depthBits() = 24;
+			gset.stencilBits() = 8;
+			return gset;
+		}
 	public:
-		GuiWindow(std::string_view title, glm::ivec2 size, ez::window::Style style, const ez::window::RenderSettings& rs)
-			: PrepareWindow(title, size, style, rs)
+		GuiWindow(std::string_view title, glm::ivec2 size, ez::window::Style style = ez::window::StylePreset::Default)
+			: Window(title, size, style, glset())
 			, imgui(*this)
 			, skia(*this)
 			, pathfinder(*this)
@@ -28,22 +25,39 @@ namespace ez {
 		{}
 
 		void draw() override final {
+			glm::ivec2 viewport = getViewportSize();
+			if (viewport.x <= 1 || viewport.y <= 1) {
+				return;
+			}
+
 			imgui.beginDraw(*this);
+			skia.beginDraw(*this);
+			pathfinder.beginDraw(*this);
+
 			guiDraw();
+
+			pathfinder.endDraw(*this);
+			skia.endDraw(*this);
 			imgui.endDraw(*this);
 		}
 
 		void handleInput() override final {
 			imgui.beginInput(*this);
-			guiHandleInput();
+
+			ez::InputEvent ev;
+			while (pollInput(ev)) {
+				imgui.handleInput(ev);
+
+				guiInput(ev);
+			}
+
 			imgui.endInput(*this);
 		}
 
 		virtual void guiDraw() = 0;
 
-		virtual void guiHandleInput() = 0;
+		virtual void guiInput(const ez::InputEvent & ev) = 0;
 
-	public:
 		gui::ImguiSubsystem imgui;
 		gui::SkiaSubsystem skia;
 		gui::PathfinderSubsystem pathfinder;

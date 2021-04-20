@@ -2,10 +2,11 @@
 #include <ez/window/BasicEngine.hpp>
 #include <ez/GuiWindow.hpp>
 
+
 class CustomWindow : public ez::GuiWindow {
 public:
-	CustomWindow(std::string_view title, glm::ivec2 size, ez::window::Style style, const ez::window::RenderSettings& rs)
-		: GuiWindow(title, size, style, rs)
+	CustomWindow(std::string_view title, glm::ivec2 size, ez::window::Style style)
+		: GuiWindow(title, size, style)
 		, show_demo_window(true)
 	{
 		ImGui::StyleColorsDark();
@@ -22,15 +23,9 @@ public:
 	}
 
 	// We override the guiHandleInput function instead of window::handleInput
-	void guiHandleInput() override {
-		ez::InputEvent ev;
-		while (pollInput(ev)) {
-			if (ev.type == ez::InEv::Closed) {
-				close();
-			}
-			else {
-				imgui.handleInput(ev);
-			}
+	void guiInput(const ez::InputEvent & ev) override {
+		if (ev.type == ez::InEv::Closed) {
+			close();
 		}
 	}
 
@@ -40,13 +35,7 @@ public:
 int main(int argc, char* argv[]) {
 	ez::window::BasicEngine engine;
 
-	ez::window::GLSettings rset;
-	rset.stencilBits() = 8;
-	rset.depthBits() = 24;
-	rset.majorVersion() = 4;
-	rset.minorVersion() = 5;
-
-	engine.add(new CustomWindow{ "Imgui test", glm::ivec2{800, 600}, ez::window::Style::Default, rset });
+	engine.add(new CustomWindow{ "Imgui test", glm::ivec2{800, 600}, ez::window::StylePreset::Default });
 
 	return engine.run(argc, argv);
 }

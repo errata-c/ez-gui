@@ -9,14 +9,13 @@ namespace ez {
 #ifdef EZ_GUI_USE_IMGUI
 #include <ez/window/Window.hpp>
 
-#include <ez/gl.hpp>
+#include <rt/loader.hpp>
 #include <imgui.h>
 #include <ez/imgui/Context.hpp>
 
 namespace ez::gui {
 	struct ImguiSubsystem {
 		ImguiSubsystem(ez::Window& window)
-			: context(window)
 		{}
 
 		void beginDraw(ez::Window& window) {
@@ -52,6 +51,8 @@ namespace ez::gui {
 		void beginInput(ez::window::Window& window) {};
 		bool handleInput(const ez::InputEvent& ev) { return false; };
 		void endInput(ez::window::Window& window) {};
+
+		bool wantsInput() const noexcept { return false; };
 	};
 };
 #endif
