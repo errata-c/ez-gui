@@ -5,14 +5,14 @@ VERSION 0.2.1
 LANGUAGES C CXX
 )
 
+include(GNUInstallDirs)
+include("cmake/ez-cmake/install-package.cmake")
+
 option(BUILD_TESTS "Build the test executables" ON)
 option(SEPARATE_DIRECTORY "Install the package into its own directory" ON)
+set(CONFIG_DIR "${CMAKE_INSTALL_DATAROOTDIR}/ez-gui" CACHE STRING "The relative directory to install package config files.")
 
-include(GNUInstallDirs)
-include("cmake/ez-cmake/install_package.cmake")
 
-set(PACK_NAME "ez-gui")
-set(CONFIG_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PACK_NAME}" CACHE STRING "The relative directory to install ${PACK_NAME} package config files.")
 
 # Provide a variety of convienence functions and classes for gui
 
