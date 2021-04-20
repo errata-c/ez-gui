@@ -6,7 +6,7 @@ LANGUAGES C CXX
 )
 
 include(GNUInstallDirs)
-include("cmake/ez-cmake/install-package.cmake")
+include("cmake/ez-cmake/install_package.cmake")
 
 option(BUILD_TESTS "Build the test executables" ON)
 option(SEPARATE_DIRECTORY "Install the package into its own directory" ON)
@@ -69,7 +69,7 @@ install(TARGETS gui
 )
 
 install_package(
-	NAME "${PACK_NAME}"
+	NAME "ez-gui"
 	NAMESPACE "ez::"
 	DESTINATION "${CONFIG_DIR}"
 	EXPORT "ez-gui-targets"
