@@ -1,75 +1,80 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.19)
 
 project(EZ_GUI
-VERSION 0.1.0
+VERSION 0.2.1
 LANGUAGES C CXX
 )
 
-# Provide a variety of convienence functions and classes for gui
-
-option(BUILD_TESTS "Build the tests for the ez-gui library" ON)
-
-option(USE_PATHFINDER "Use pathfinder for vector graphics" OFF)
-option(USE_SKIA "Use skia for vector graphics" ON)
-option(USE_IMGUI "Use imgui for gui elements" ON)
-option(USE_MQ "Use ez-mq for a message queue" OFF)
-
-
+option(BUILD_TESTS "Build the test executables" ON)
+option(SEPARATE_DIRECTORY "Install the package into its own directory" ON)
 
 include(GNUInstallDirs)
-find_package(ez-cmake CONFIG REQUIRED)
+include("cmake/ez-cmake/install_package.cmake")
+
+set(PACK_NAME "ez-gui")
+set(CONFIG_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PACK_NAME}" CACHE STRING "The relative directory to install ${PACK_NAME} package config files.")
+
+# Provide a variety of convienence functions and classes for gui
+
+# Provide a better way to use Vector Graphics
+# Provide some ImGui integration to make it easier to setup complicated things like lists, trees, etc...
+# Make it possible to use ImGui more like a traditional GUI system.
+
 find_package(ez-window CONFIG REQUIRED)
-find_package(glew CONFIG REQUIRED)
+find_package(rt-loader CONFIG REQUIRED glew)
+find_package(rt-core CONFIG REQUIRED)
 
-
-add_library(ez-gui STATIC 
-	"src/GuiWindow.cpp"
+add_library(gui INTERFACE)
+target_link_libraries(gui INTERFACE
+	ez::window
+	rt::loader-glew
+	rt::core
 )
-target_link_libraries(ez-gui PUBLIC ez::window GLEW::GLEW)
-target_include_directories(ez-gui PUBLIC 
-	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+target_include_directories(gui INTERFACE 
 	"$<INSTALL_INTERFACE:include>"
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 )
-target_compile_features(ez-gui PUBLIC cxx_std_17)
 
-set_target_properties(ez-gui PROPERTIES EXPORT_NAME "gui")
-add_library(ez::gui ALIAS ez-gui)
+add_library(ez::gui ALIAS gui)
 
 
-
-# ---------------------------------------------------------------------
-if(${USE_MQ})
-	find_package(ez-mq CONFIG REQUIRED)
-	add_library(ez-gui-mq INTERFACE)
-	target_link_libraries(ez-gui-mq INTERFACE ez::gui ez::mq)
-	target_compile_definitions(ez-gui-mq INTERFACE "EZ_GUI_USE_MQ")
-endif()
-# ---------------------------------------------------------------------
-
-
-
-# ---------------------------------------------------------------------
-if(${USE_IMGUI})
-	find_package(ez-imgui CONFIG REQUIRED)
-	add_library(ez-gui-imgui INTERFACE)
-	target_link_libraries(ez-gui-imgui INTERFACE ez::gui ez::imgui ez::imgui-opengl3)
-	target_compile_definitions(ez-gui-imgui INTERFACE "EZ_GUI_USE_IMGUI")
-endif()
-# ---------------------------------------------------------------------
-
-
-
-# ---------------------------------------------------------------------
-if(${USE_SKIA})
-	find_package(skia CONFIG REQUIRED)
-	add_library(ez-gui-skia INTERFACE)
-	target_link_libraries(ez-gui-skia INTERFACE skia ez::gui)
-	target_compile_definitions(ez-gui-skia INTERFACE "EZ_GUI_USE_SKIA")
-endif()
-# ---------------------------------------------------------------------
-
-
-
-if(${BUILD_TESTS})
+if(BUILD_TESTS)
 	add_subdirectory("tests")
 endif()
+
+if(SEPARATE_DIRECTORY)
+	set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/ez-gui")
+endif()
+
+install(FILES 
+	"cmake/imgui.cmake" 
+	"cmake/mq.cmake" 
+	"cmake/pathfinder.cmake" 
+	"cmake/skia.cmake"
+
+	DESTINATION "share"
+)
+
+install(DIRECTORY "include/"
+	DESTINATION "include"
+	FILES_MATCHING
+	PATTERN "*.hpp" PATTERN "*.h"
+)
+
+install(TARGETS gui 
+	EXPORT ez-gui-targets
+	RUNTIME DESTINATION "bin/$<CONFIG>"
+	ARCHIVE DESTINATION "lib/$<CONFIG>"
+	LIBRARY DESTINATION "lib/$<CONFIG>"
+)
+
+install_package(
+	NAME "${PACK_NAME}"
+	NAMESPACE "ez::"
+	DESTINATION "${CONFIG_DIR}"
+	EXPORT "ez-gui-targets"
+	VERSION "${EZ_GUI_VERSION}"
+	COMPATIBILITY "SameMajorVersion"
+	PRECONFIG "cmake/preconfig.cmake"
+	POSTCONFIG "cmake/postconfig.cmake"
+)

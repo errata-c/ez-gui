@@ -4,8 +4,8 @@
 
 class CustomWindow : public ez::GuiWindow {
 public:
-	CustomWindow(std::string_view title, glm::ivec2 size, ez::window::Style style, const ez::window::RenderSettings& rs)
-		: GuiWindow(title, size, style, rs)
+	CustomWindow(std::string_view title, glm::ivec2 size, ez::window::Style style)
+		: GuiWindow(title, size, style)
 	{
 		
 	}
@@ -18,7 +18,7 @@ public:
 		glClearColor(242 / 255.f, 248 / 255.f, 1.f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		SkCanvas& canvas = skia.getCanvas();
+		SkCanvas& canvas = skia.canvas();
 
 		SkPath path;
 		path.moveTo(1.f, 0.f);
@@ -52,13 +52,12 @@ public:
 	}
 
 	// We override the guiHandleInput function instead of window::handleInput
-	void guiHandleInput() override {
-		ez::InputEvent ev;
-		while (pollInput(ev)) {
-			if (ev.type == ez::InEv::Closed) {
-				close();
-			}
+	void guiInput(const ez::InputEvent & ev) override {
+
+		if (ev.type == ez::InEv::Closed) {
+			close();
 		}
+		
 	}
 };
 
@@ -71,7 +70,7 @@ int main(int argc, char* argv[]) {
 	rset.majorVersion() = 4;
 	rset.minorVersion() = 5;
 
-	engine.add(new CustomWindow{ "Skia test", glm::ivec2{800, 600}, ez::window::Style::Default, rset });
+	engine.add(new CustomWindow{ "Skia test", glm::ivec2{800, 600}, ez::window::StylePreset::Default });
 
 	//engine.setRealtime(false);
 	return engine.run(argc, argv);

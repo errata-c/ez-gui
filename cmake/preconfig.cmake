@@ -1,0 +1,12 @@
+set(ez-gui_ROOT ${PACKAGE_PREFIX_DIR})
+set(ez-gui_SHARE ${CMAKE_CURRENT_LIST_DIR})
+
+if(NOT TARGET "ez::window")
+	find_dependency(ez-window CONFIG)
+endif()
+if(NOT TARGET "rt::loader-glew") 
+	find_dependency(rt-loader CONFIG COMPONENTS glew)
+endif()
+if(NOT TARGET "rt::core") 
+	find_dependency(rt-core CONFIG)
+endif()

@@ -9,7 +9,7 @@ namespace ez {
 
 #ifdef EZ_GUI_USE_SKIA 
 
-#include <ez/gl.hpp>
+#include <rt/loader.hpp>
 #include <GL/glew.h>
 #include <ez/window/Window.hpp>
 
@@ -27,21 +27,28 @@ namespace ez {
 
 namespace ez::gui {
 	struct SkiaSubsystem {
-		SkiaSubsystem(ez::window::Window& window) {
+		SkiaSubsystem(ez::window::Window& window) 
+		{
 			window.setActive(true);
-			glm::ivec2 viewport = window.getViewportSize();
 
 			interface = GrGLMakeNativeInterface();
 			context = GrContext::MakeGL(interface);
 
-			int32_t buffer;
+			createSurface(window.getViewportSize());
+		}
+
+		void createSurface(glm::ivec2 size) {
+			GrGLint buffer;
 			glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
 
+			GrGLFramebufferInfo fbInfo;
 			fbInfo.fFBOID = buffer;
 			fbInfo.fFormat = GL_RGBA8;
-			SkColorType colorType = SkColorType::kRGBA_8888_SkColorType;
 
-			SkSurfaceProps props{ 0, kUnknown_SkPixelGeometry };
+			SkColorType colorType = SkColorType::kRGBA_8888_SkColorType;
+			SkSurfaceProps props{ 0, kRGB_H_SkPixelGeometry };
+
+			viewport = size;
 			GrBackendRenderTarget target(viewport.x, viewport.y, 0, 8, fbInfo);
 
 			gpuSurface = SkSurface::MakeFromBackendRenderTarget(
@@ -57,24 +64,38 @@ namespace ez::gui {
 			}
 		}
 
-		SkCanvas& getCanvas() {
+		SkCanvas& canvas() {
 			return *gpuSurface->getCanvas();
 		}
-		const SkCanvas& getCanvas() const {
+		const SkCanvas& canvas() const {
 			return *gpuSurface->getCanvas();
 		}
+
+		void beginDraw(ez::window::Window& window) {
+			glm::ivec2 framesize = window.getViewportSize();
+			if (viewport != framesize) {
+				createSurface(viewport);
+			}
+		}
+		void endDraw(ez::window::Window& window) {
+
+		}
+
+		glm::ivec2 viewport;
 
 		sk_sp<const GrGLInterface> interface;
 		sk_sp<GrContext> context;
 		SkImageInfo imageInfo;
 		sk_sp<SkSurface> gpuSurface;
-		GrGLFramebufferInfo fbInfo;
 	};
 }
 #else
 namespace ez::gui {
 	struct SkiaSubsystem {
 		SkiaSubsystem(ez::window::Window& window) {}
+
+		void beginDraw(ez::window::Window& window) {};
+		void endDraw(ez::window::Window& window) {};
 	};
 };
 #endif
