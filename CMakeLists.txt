@@ -6,7 +6,14 @@ LANGUAGES C CXX
 )
 
 include(GNUInstallDirs)
-include("cmake/ez-cmake/install_package.cmake")
+include(FetchContent)
+
+FetchContent_Declare(
+	ez-cmake
+	GIT_REPOSITORY "https://github.com/errata-c/ez-cmake.git"
+	GIT_TAG "c174cbd947278d4dd8e2f7d7f3c3499cd0b7f5ad"
+)
+FetchContent_MakeAvailable(ez-cmake)
 
 option(BUILD_TESTS "Build the test executables" ON)
 option(SEPARATE_DIRECTORY "Install the package into its own directory" ON)
@@ -21,12 +28,14 @@ set(CONFIG_DIR "${CMAKE_INSTALL_DATAROOTDIR}/ez-gui" CACHE STRING "The relative 
 # Make it possible to use ImGui more like a traditional GUI system.
 
 find_package(ez-window CONFIG REQUIRED)
+find_package(ez-geo CONFIG REQUIRED)
 find_package(rt-loader CONFIG REQUIRED glew)
 find_package(rt-core CONFIG REQUIRED)
 
 add_library(gui INTERFACE)
 target_link_libraries(gui INTERFACE
 	ez::window
+	ez::geo
 	rt::loader-glew
 	rt::core
 )

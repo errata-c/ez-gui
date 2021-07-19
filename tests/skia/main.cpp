@@ -6,9 +6,7 @@ class CustomWindow : public ez::GuiWindow {
 public:
 	CustomWindow(std::string_view title, glm::ivec2 size, ez::window::Style style)
 		: GuiWindow(title, size, style)
-	{
-		
-	}
+	{}
 
 	// We override the guiDraw function instead of window::draw
 	void guiDraw() override {
